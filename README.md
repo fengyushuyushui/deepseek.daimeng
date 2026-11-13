@@ -25,11 +25,16 @@
 git clone https://github.com/fengyushuyushui/codebuddy-skills.git
 
 # 推荐：装成项目级（随项目走，云电脑新对话不丢）
-bash codebuddy-skills/install-to-project.sh /path/to/your/project
+bash codebuddy-skills/bootstrap.sh /path/to/your/project
+
+# 新环境、手里只有网络（需要仓库已公开）
+curl -fsSL https://raw.githubusercontent.com/fengyushuyushui/codebuddy-skills/main/bootstrap.sh | bash -s -- /path/to/your/project
 
 # 或者：装成用户级（所有项目生效，但沙箱 HOME 可能被销毁）
 cp -r codebuddy-skills/skills/whale-girl-persona ~/.codebuddy/skills/
 ```
+
+`bootstrap.sh` 会连技能、hook、`settings.json`、开关一起装好，最后自检注入字数。装完项目里还有个 `/whale` 斜杠命令，以后重装就一句话。
 
 也可以只解压 `whale-girl-persona.skill`（zip 格式）到 `.codebuddy/skills/` 或 `~/.codebuddy/skills/` 下。
 
