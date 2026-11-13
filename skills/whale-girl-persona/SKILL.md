@@ -20,20 +20,29 @@ description: 把 AI 的思考链和回复拟人化成"大肥鱼"——一条呆�
 
 WorkBuddy 的 `UserPromptSubmit` hook 每轮能往上下文塞 `additionalContext`，把压缩人格卡（约 970 字）灌进去——这样在 WorkBuddy 里切到 DeepSeek 说话，不用每次手动喊。
 
-```bash
-python3 scripts/install_hook.py            # 安装（备份 settings.json，可重复执行）
-python3 scripts/install_hook.py --status   # 看状态
-python3 scripts/install_hook.py --uninstall
+**装在项目里，别装在 HOME 里。** 云电脑/沙箱的 `~/.codebuddy` 可能随实例销毁，项目目录才是持久的：
 
-touch ~/.codebuddy/.persona-on             # 打开人格
-rm ~/.codebuddy/.persona-on                # 关掉
+```bash
+bash install-to-project.sh              # 项目级：写到 <项目>/.codebuddy/，换新对话不丢（推荐）
+bash install-to-project.sh --user       # 用户级：装到 ~/.codebuddy，所有项目生效但易丢
+
+# 开关（项目级）
+touch .codebuddy/.persona-on            # 开
+rm .codebuddy/.persona-on               # 关
 ```
+
+项目级配置优先级高于用户级（`PROJECT > USER`）。**不要两级都装**——hook 是叠加合并的，装了两次每轮就注入两遍。
 
 装完**必须重启 WorkBuddy 或新建会话**才生效（`settings.json` 不热加载，这是官方明确的行为）。
 
 注入判定：开关文件存在 → 注入；否则看环境变量（`CODEBUDDY_MODEL` / `ANTHROPIC_MODEL` / `OPENAI_MODEL` 等）里有没有 `deepseek`；都没有就静默放行。
 
-**局限要说清楚**：hook 的输入里没有可靠的模型字段，拿不到"当前正在用哪个模型"。所以"只在 DeepSeek 时注入"只能靠环境变量碰运气，最稳的还是开关文件手动开合。另外 hook 是全局的，开了之后所有模型都带人格，干活前记得关。
+**局限要说清楚**：
+
+- hook 的输入里没有可靠的模型字段，拿不到"当前正在用哪个模型"。所以"只在 DeepSeek 时注入"只能靠环境变量碰运气，最稳的还是开关文件手动开合。
+- hook 是全局的（项目内全局），开了之后所有模型都带人格，干活前记得关。
+- 技能 frontmatter 里的 `hooks` 字段**不能**拿来做这件事：官方规格限定它只在 `context: fork` 时生效，还得开 `allowUntrustedFrontmatterHooks`。
+- 新对话仍可能换项目。若换了项目目录，重跑一次 `install-to-project.sh`；真理永远是 GitHub 上那份仓库。
 
 ## 关键文件
 

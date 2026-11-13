@@ -24,7 +24,7 @@ SETTINGS = CFG_DIR / "settings.json"
 FLAG = CFG_DIR / ".persona-on"
 CMD = f"python3 {HOOKS_DIR / 'whale_persona_inject.py'}"
 SKILL_DIR = Path(__file__).resolve().parent.parent
-SRC = SKILL_DIR / "scripts" / "hook_persona_inject.py"
+SRC = SKILL_DIR / "scripts" / "whale_persona_inject.py"
 
 
 def load_settings() -> dict:

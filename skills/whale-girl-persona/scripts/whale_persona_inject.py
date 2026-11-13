@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
-"""把「大肥鱼」人格注入 WorkBuddy 上下文（hook 用）。
+"""把「大肥鱼」人格注入上下文（WorkBuddy / CodeBuddy hook 用）。
 
-触发条件（任一成立才注入）：
-  1. 开关文件 ~/.codebuddy/.persona-on 存在
-  2. 环境变量里能读到模型名，且名字含 deepseek
+可放在三处，自动定位人格卡与开关：
+  1. <project>/.codebuddy/hooks/whale_persona_inject.py   ← 项目级（推荐，随项目走）
+  2. ~/.codebuddy/hooks/whale_persona_inject.py           ← 用户级
+  3. <skill>/scripts/hook_persona_inject.py               ← 技能内（手动调用）
 
-用途: 在 settings.json 的 SessionStart / UserPromptSubmit 上注册。
-失败一律静默放行，绝不阻塞用户。
+注入条件（任一）：
+  - 开关文件 <project>/.codebuddy/.persona-on 或 ~/.codebuddy/.persona-on 存在
+  - 环境变量里的模型名含 deepseek
+
+任何异常都静默放行，绝不阻塞用户。
 """
 
 import json
@@ -15,14 +19,32 @@ import sys
 from pathlib import Path
 
 HOME = Path.home()
-FLAG = HOME / ".codebuddy" / ".persona-on"
+HERE = Path(__file__).resolve()
 
-# 优先用技能目录内的压缩人格卡（脚本在 hooks/ 或 skills/<name>/scripts/ 下都能找到）
-_CANDIDATES = [
-    Path(__file__).resolve().parent.parent / "references" / "persona-compact.md",
-    HOME / ".codebuddy" / "skills" / "whale-girl-persona" / "references" / "persona-compact.md",
+
+def _first_existing(paths):
+    for p in paths:
+        if p.exists():
+            return p
+    return paths[0]
+
+
+# 位于 <root>/.codebuddy/hooks/ 时 parent.parent = <root>/.codebuddy
+# 位于 <skill>/scripts/ 时 parent.parent = <skill>
+CFG_DIR = HERE.parent.parent
+SKILL_DIR = _first_existing([
+    CFG_DIR / "skills" / "whale-girl-persona",
+    CFG_DIR,
+    HERE.parent,
+    HOME / ".codebuddy" / "skills" / "whale-girl-persona",
+])
+COMPACT = SKILL_DIR / "references" / "persona-compact.md"
+
+FLAGS = [
+    CFG_DIR / ".persona-on",
+    HOME / ".codebuddy" / ".persona-on",
 ]
-COMPACT = next((p for p in _CANDIDATES if p.exists()), _CANDIDATES[0])
+
 MODEL_ENVS = ("CODEBUDDY_MODEL", "ANTHROPIC_MODEL", "CODEBUDDY_CODE_MODEL", "OPENAI_MODEL", "LLM_MODEL")
 
 HEADER = (
@@ -40,7 +62,7 @@ def detect_model() -> str:
 
 
 def should_inject() -> bool:
-    if FLAG.exists():
+    if any(f.exists() for f in FLAGS):
         return True
     return "deepseek" in detect_model()
 

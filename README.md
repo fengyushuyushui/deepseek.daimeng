@@ -23,10 +23,15 @@
 
 ```bash
 git clone https://github.com/fengyushuyushui/codebuddy-skills.git
+
+# 推荐：装成项目级（随项目走，云电脑新对话不丢）
+bash codebuddy-skills/install-to-project.sh /path/to/your/project
+
+# 或者：装成用户级（所有项目生效，但沙箱 HOME 可能被销毁）
 cp -r codebuddy-skills/skills/whale-girl-persona ~/.codebuddy/skills/
 ```
 
-或者解压发布包：把 `whale-girl-persona.skill`（zip 格式）解到 `~/.codebuddy/skills/` 下即可。
+也可以只解压 `whale-girl-persona.skill`（zip 格式）到 `.codebuddy/skills/` 或 `~/.codebuddy/skills/` 下。
 
 #### 用法一：直接聊天（人格落到任意模型）
 
@@ -57,16 +62,39 @@ python3 skills/whale-girl-persona/scripts/deepseek_persona.py --dry-run "测试"
 
 不想每次手动喊"用大肥鱼说话"，就把它挂到 `UserPromptSubmit` 上——每轮往上下文塞一张 970 字的压缩人格卡，成本可以忽略。
 
-```bash
-python3 skills/whale-girl-persona/scripts/install_hook.py            # 安装（备份 settings.json，幂等）
-python3 skills/whale-girl-persona/scripts/install_hook.py --status
-python3 skills/whale-girl-persona/scripts/install_hook.py --uninstall
+**要装在项目里，不是 HOME 里**（云电脑的 `~/.codebuddy` 会随实例没）：
 
-touch ~/.codebuddy/.persona-on    # 打开人格
-rm ~/.codebuddy/.persona-on       # 关掉
+```bash
+bash install-to-project.sh            # 装进当前项目的 .codebuddy/（推荐）
+bash install-to-project.sh --user     # 或装到 ~/.codebuddy，所有项目生效
+bash install-to-project.sh /path/to/proj
+
+touch .codebuddy/.persona-on          # 开
+rm .codebuddy/.persona-on             # 关
 ```
 
-装完要**重启 WorkBuddy 或新建会话**（`settings.json` 不热加载）。默认不注入，干活时记得关——hook 拿不到可靠的模型名，"只在 DeepSeek 时开"只能靠开关文件，或者指望环境变量里恰好有 `deepseek` 字样。
+装完要**重启 WorkBuddy 或新建会话**（`settings.json` 不热加载）。别项目级和用户级都装——hook 是叠加的，会注入两遍。
+
+#### 云电脑里新开对话会丢吗
+
+会，如果你装在 HOME 里。三层是这么分的：
+
+| 层 | 位置 | 新对话还在吗 | 说明 |
+|---|---|---|---|
+| 项目级 | `<项目>/.codebuddy/` | ✅ 同一个项目就在 | 推荐，随项目走，优先级高于用户级 |
+| 用户级 | `~/.codebuddy/` | ⚠️ 看实例 | 沙箱/云电脑 HOME 可能被销毁 |
+| GitHub | 仓库本身 | ✅ 永远 | 真理源，新环境 clone 一次就回来 |
+
+恢复只要一条：
+
+```bash
+git clone https://github.com/fengyushuyushui/codebuddy-skills.git
+bash codebuddy-skills/install-to-project.sh /path/to/project
+```
+
+换到**另一个项目目录**时，项目级配置不在那儿，重跑一次 install 就行。
+
+最省心的其实是 WorkBuddy 账号级的「给 WorkBuddy 的指令」：跟沙箱无关，把 `persona-compact.md` 整段粘进去，所有对话自动带。缺点是全局，干活时得手动改回来。
 
 #### 人格是怎么搭的
 
