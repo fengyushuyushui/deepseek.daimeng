@@ -53,6 +53,21 @@ python3 skills/whale-girl-persona/scripts/deepseek_persona.py --dry-run "测试"
 3. 别给 reasoner 传 `temperature` / `top_p`，会 400；
 4. `delta.reasoning_content` 与 `delta.content` 分开渲染，且思考链不回灌进多轮 history。
 
+#### 用法四：WorkBuddy 里每轮自动带人格（hook）
+
+不想每次手动喊"用大肥鱼说话"，就把它挂到 `UserPromptSubmit` 上——每轮往上下文塞一张 970 字的压缩人格卡，成本可以忽略。
+
+```bash
+python3 skills/whale-girl-persona/scripts/install_hook.py            # 安装（备份 settings.json，幂等）
+python3 skills/whale-girl-persona/scripts/install_hook.py --status
+python3 skills/whale-girl-persona/scripts/install_hook.py --uninstall
+
+touch ~/.codebuddy/.persona-on    # 打开人格
+rm ~/.codebuddy/.persona-on       # 关掉
+```
+
+装完要**重启 WorkBuddy 或新建会话**（`settings.json` 不热加载）。默认不注入，干活时记得关——hook 拿不到可靠的模型名，"只在 DeepSeek 时开"只能靠开关文件，或者指望环境变量里恰好有 `deepseek` 字样。
+
 #### 人格是怎么搭的
 
 | 层 | 内容 | 作用 |

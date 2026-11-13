@@ -13,12 +13,35 @@ description: 把 AI 的思考链和回复拟人化成"大肥鱼"——一条呆�
 |---|---|
 | 让我（当前 agent）用这个语气回话 | 读 `references/persona-prompt.md`，从现在起按它说话；手感不够再扫 `references/style-bank.md` |
 | 让 **DeepSeek** 的思考链和回复都人格化 | 跑 `scripts/deepseek_persona.py`（已内置人格注入与思维链分流） |
+| 让 **WorkBuddy 每次对话自动带人格** | 跑 `scripts/install_hook.py` 装 hook，开关文件控制 |
 | 把这套 prompt 接到用户自己的应用 | 直接交付 `references/persona-prompt.md` 文件 + 下面「注入要点」 |
+
+## 让 WorkBuddy 自动带人格（hook）
+
+WorkBuddy 的 `UserPromptSubmit` hook 每轮能往上下文塞 `additionalContext`，把压缩人格卡（约 970 字）灌进去——这样在 WorkBuddy 里切到 DeepSeek 说话，不用每次手动喊。
+
+```bash
+python3 scripts/install_hook.py            # 安装（备份 settings.json，可重复执行）
+python3 scripts/install_hook.py --status   # 看状态
+python3 scripts/install_hook.py --uninstall
+
+touch ~/.codebuddy/.persona-on             # 打开人格
+rm ~/.codebuddy/.persona-on                # 关掉
+```
+
+装完**必须重启 WorkBuddy 或新建会话**才生效（`settings.json` 不热加载，这是官方明确的行为）。
+
+注入判定：开关文件存在 → 注入；否则看环境变量（`CODEBUDDY_MODEL` / `ANTHROPIC_MODEL` / `OPENAI_MODEL` 等）里有没有 `deepseek`；都没有就静默放行。
+
+**局限要说清楚**：hook 的输入里没有可靠的模型字段，拿不到"当前正在用哪个模型"。所以"只在 DeepSeek 时注入"只能靠环境变量碰运气，最稳的还是开关文件手动开合。另外 hook 是全局的，开了之后所有模型都带人格，干活前记得关。
 
 ## 关键文件
 
 - `references/persona-prompt.md` — **核心资产**。整份是可直接粘贴的 system prompt。身份、第一禁令、说话方式、思考链写法、浓度分级、兜底，六节。不要擅自删节。
 - `references/style-bank.md` — 语料库。思考链范例、回复范例、AI 味黑名单、改写对照。写之前扫一眼找手感，别整段照搬。
+- `references/persona-compact.md` — 970 字压缩人格卡，hook 每轮灌进上下文的就是它。改人设优先级：先改它，再改完整版。
+- `scripts/hook_persona_inject.py` — hook 本体，读开关文件、输出 `additionalContext`。
+- `scripts/install_hook.py` — 安装/卸载/查状态，会备份 `settings.json`，幂等。
 - `scripts/deepseek_persona.py` — DeepSeek 调用器，流式输出，思考链与回复分开呈现。
 - `assets/avatar-whale-maid.png` — 角色立绘，用户要在文档/README 里配图时用。
 
