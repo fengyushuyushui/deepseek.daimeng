@@ -139,7 +139,7 @@ def chat_loop(args, persona: str) -> None:
         try:
             user = input(f"\n{CYAN}你> {RESET}").strip()
         except (EOFError, KeyboardInterrupt):
-            print("\n走了。米饭别凉了。" if not args.no_persona_signoff else "")
+            print("\n走了。米饭别凉了。")
             return
         if not user:
             continue
@@ -148,11 +148,9 @@ def chat_loop(args, persona: str) -> None:
             return
         history.append({"role": "user", "content": user + ("\n\n" + NAIL if args.nail else "")})
         payload = build_payload(args.model, history, args.temperature, stream=True)
-        reasoning, content = request_stream(payload, args.verbose)
+        _, content = request_stream(payload, args.verbose)
+        # 只回灌正文。思考链留在终端，否则多轮上下文会被碎碎念塞满
         history.append({"role": "assistant", "content": content})
-        # 思考链不回灌，避免多轮越来越啰嗦
-        if reasoning:
-            history[-1]["reasoning_content"] = None
 
 
 def main() -> None:
@@ -165,7 +163,6 @@ def main() -> None:
     p.add_argument("--no-nail", dest="nail", action="store_false", help="不追加 user 侧人格钉子")
     p.add_argument("--dry-run", action="store_true", help="只打印 payload，不发请求")
     p.add_argument("--verbose", action="store_true", help="额外打印 usage")
-    p.add_argument("--no-persona-signoff", action="store_true", help=argparse.SUPPRESS)
     p.set_defaults(nail=True)
     args = p.parse_args()
 
