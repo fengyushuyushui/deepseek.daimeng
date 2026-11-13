@@ -5,12 +5,12 @@
 #   bash bootstrap.sh /workspace
 #
 # 没有仓库时（联网）:
-#   curl -fsSL https://raw.githubusercontent.com/fengyushuyushui/codebuddy-skills/main/bootstrap.sh | bash -s -- /workspace
+#   curl -fsSL https://raw.githubusercontent.com/fengyushuyushui/deepseek.daimeng/main/bootstrap.sh | bash -s -- /workspace
 #
 # 换源: WHALE_REPO=https://github.com/you/your-fork.git bash bootstrap.sh
 set -euo pipefail
 
-REPO_URL="${WHALE_REPO:-https://github.com/fengyushuyushui/codebuddy-skills.git}"
+REPO_URL="${WHALE_REPO:-https://github.com/fengyushuyushui/deepseek.daimeng.git}"
 TARGET="${1:-$PWD}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || echo "")"
 

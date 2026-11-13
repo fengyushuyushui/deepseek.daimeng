@@ -22,13 +22,13 @@
 #### 安装
 
 ```bash
-git clone https://github.com/fengyushuyushui/codebuddy-skills.git
+git clone https://github.com/fengyushuyushui/deepseek.daimeng.git
 
 # 推荐：装成项目级（随项目走，云电脑新对话不丢）
 bash codebuddy-skills/bootstrap.sh /path/to/your/project
 
-# 新环境、手里只有网络（需要仓库已公开）
-curl -fsSL https://raw.githubusercontent.com/fengyushuyushui/codebuddy-skills/main/bootstrap.sh | bash -s -- /path/to/your/project
+# 新环境、只有网络：先拉到临时目录再装（比 curl | bash 稳，raw 域名在部分网络不可达）
+git clone --depth 1 https://github.com/fengyushuyushui/deepseek.daimeng.git /tmp/cbs && bash /tmp/cbs/bootstrap.sh /path/to/your/project
 
 # 或者：装成用户级（所有项目生效，但沙箱 HOME 可能被销毁）
 cp -r codebuddy-skills/skills/whale-girl-persona ~/.codebuddy/skills/
@@ -93,7 +93,7 @@ rm .codebuddy/.persona-on             # 关
 恢复只要一条：
 
 ```bash
-git clone https://github.com/fengyushuyushui/codebuddy-skills.git
+git clone https://github.com/fengyushuyushui/deepseek.daimeng.git
 bash codebuddy-skills/install-to-project.sh /path/to/project
 ```
 
