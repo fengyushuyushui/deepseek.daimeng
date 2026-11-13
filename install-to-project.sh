@@ -21,11 +21,16 @@ elif [ -n "${1:-}" ]; then
 fi
 
 CFG="$TARGET/.codebuddy"
-mkdir -p "$CFG/skills" "$CFG/hooks"
+mkdir -p "$CFG/skills" "$CFG/hooks" "$CFG/commands"
 rm -rf "$CFG/skills/whale-girl-persona"
 cp -r "$SKILL_SRC" "$CFG/skills/whale-girl-persona"
 cp "$SKILL_SRC/scripts/whale_persona_inject.py" "$CFG/hooks/whale_persona_inject.py"
 chmod +x "$CFG/hooks/whale_persona_inject.py"
+
+if [ -f "$HERE/commands/whale.md" ]; then
+  cp "$HERE/commands/whale.md" "$CFG/commands/whale.md"
+  echo "slash 命令已装: /whale"
+fi
 
 HOOK_ABS="$CFG/hooks/whale_persona_inject.py"
 python3 - "$CFG/settings.json" "$HOOK_ABS" <<'PY'
@@ -63,4 +68,6 @@ echo "  开: touch $CFG/.persona-on"
 echo "  关: rm $CFG/.persona-on"
 echo
 echo "生效: 重启 WorkBuddy 或新建会话（settings.json 不热加载）"
-[ "$MODE" = "user" ] && echo "注意: 用户级对全部项目生效，干活前记得关。"
+if [ "$MODE" = "user" ]; then
+  echo "注意: 用户级对全部项目生效，干活前记得关。"
+fi
